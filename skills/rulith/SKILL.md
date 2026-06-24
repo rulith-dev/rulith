@@ -5,7 +5,7 @@ description: Use the rulith reasoning board for multi-step verification, exact a
 
 # rulith — the reasoning board
 
-rulith (Greek ἄβαξ, "counting board") is an external working memory with a
+rulith — *rule* + *-lith* (Greek *líthos*, "stone") — is an external working memory with a
 rule engine. You propose **facts**, **rules**, and **actions**; the board
 computes closures, does exact arithmetic, tracks consumption/production,
 and keeps an evidence chain for everything. Its discipline in one line:

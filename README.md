@@ -15,8 +15,7 @@ that rest on bare claims are rejected.
 > board from Claude Code: the frontier model supervising the release
 > (Claude Fable 5 Max) had mentally computed `9381274 × 6473` and
 > confidently repeated the wrong answer three times. The board derived the right one. That incident is
-> [validation round #27](docs/real-task-log.md) — the product demoing
-> itself on its own author.
+> validation round #27 — the product demoing itself on its own author.
 
 ## Why
 
@@ -84,7 +83,7 @@ missing atom (`producible via action ...`).
 ## Validated, not vibe-coded
 
 This kernel was built against a discipline of red-tests-first and
-real-model validation: [100+ logged rounds](docs/real-task-log.md) of
+real-model validation: 100+ logged rounds of
 local models (gemma/qwen, 27B–35B class) driving the board through real
 tasks — judgment, diagnosis-and-repair, open-ended audit, stoichiometric
 reactions — each round documented with board evidence, each kernel gap
@@ -103,10 +102,6 @@ losses were generation-level runaways, replayed clean and re-verified
 with BigInt. Fixtures: `src/examples/bench-arith.ts` (and `bench-audit.ts`). 1,100+ unit
 tests; CI on Linux and Windows. A/B benchmark fixtures (exact
 arithmetic, error-finding audits) ship in `src/examples/`.
-
-The lab notes and agent runtime around the kernel live in this repo too:
-see [docs/rulith-lab.md](docs/rulith-lab.md) (Chinese) for the REPL, web
-board visualizer, and verification fixtures.
 
 ## License
 
