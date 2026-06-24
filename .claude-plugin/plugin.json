@@ -1,0 +1,29 @@
+{
+  "name": "rulith",
+  "displayName": "rulith — reasoning board",
+  "description": "An external reasoning board for agents: facts, rules, and actions go on the board; the board does exact arithmetic, derives conclusions with provenance, and refuses unverifiable claims. Derived or it didn't happen.",
+  "author": {
+    "name": "Victor Shaw",
+    "email": "michaltina@hotmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "reasoning",
+    "verification",
+    "datalog",
+    "working-memory",
+    "audit",
+    "provenance",
+    "mcp"
+  ],
+  "mcpServers": {
+    "rulith": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "rulith"
+      ]
+    }
+  },
+  "version": "0.2.0"
+}
