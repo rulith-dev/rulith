@@ -4,7 +4,7 @@
   "version": "0.3.0",
   "type": "module",
   "description": "An external reasoning board for LLM agents. Derived or it didn't happen. (npm package: rulith)",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

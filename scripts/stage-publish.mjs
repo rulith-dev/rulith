@@ -64,7 +64,7 @@ const pkg = {
     'mcp', 'mcp-server', 'reasoning', 'verification', 'datalog',
     'working-memory', 'provenance', 'audit', 'agent', 'neurosymbolic',
   ],
-  license: 'MIT',
+  license: 'Apache-2.0',
   author: 'Victor Shaw <michaltina@hotmail.com>',
   type: 'module',
   bin: { rulith: 'dist/mcp/run.js' },

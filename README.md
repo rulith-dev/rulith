@@ -17,6 +17,11 @@ that rest on bare claims are rejected.
 > confidently repeated the wrong answer three times. The board derived the right one. That incident is
 > validation round #27 — the product demoing itself on its own author.
 
+## Papers
+
+- **The Driving Floor: When an External Symbolic Reasoning Board Helps an LLM** — the empirical study (board vs baseline across quantized local models). [PDF](docs/papers/preprint-draft.pdf) · [中文版](docs/papers/preprint-draft-zh.pdf)
+- **The Rulith Decision Kernel: Proof-Carrying Decisions for Autonomous Agents** — the whitepaper (the trust invariants + the commitment ladder). [PDF](docs/papers/whitepaper-self-driving-kernel.pdf) · [中文版](docs/papers/whitepaper-self-driving-kernel-zh.pdf)
+
 ## Why
 
 LLMs assert; they do not prove. For tasks where a wrong number or an
@@ -105,4 +110,4 @@ arithmetic, error-finding audits) ship in `src/examples/`.
 
 ## License
 
-MIT
+[Apache License 2.0](LICENSE).
