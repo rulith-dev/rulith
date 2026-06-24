@@ -19,8 +19,8 @@ that rest on bare claims are rejected.
 
 ## Papers
 
-- **The Driving Floor: When an External Symbolic Reasoning Board Helps an LLM** — the empirical study (board vs baseline across quantized local models). [PDF](docs/papers/preprint-draft.pdf) · [中文版](docs/papers/preprint-draft-zh.pdf)
-- **The Rulith Decision Kernel: Proof-Carrying Decisions for Autonomous Agents** — the whitepaper (the trust invariants + the commitment ladder). [PDF](docs/papers/whitepaper-self-driving-kernel.pdf) · [中文版](docs/papers/whitepaper-self-driving-kernel-zh.pdf)
+- **The Driving Floor: When an External Symbolic Reasoning Board Helps an LLM** — the empirical study (board vs baseline across quantized local models). [PDF](https://github.com/rulith-dev/rulith/blob/main/docs/papers/preprint-draft.pdf) · [中文版](https://github.com/rulith-dev/rulith/blob/main/docs/papers/preprint-draft-zh.pdf)
+- **The Rulith Decision Kernel: Proof-Carrying Decisions for Autonomous Agents** — the whitepaper (the trust invariants + the commitment ladder). [PDF](https://github.com/rulith-dev/rulith/blob/main/docs/papers/whitepaper-self-driving-kernel.pdf) · [中文版](https://github.com/rulith-dev/rulith/blob/main/docs/papers/whitepaper-self-driving-kernel-zh.pdf)
 
 ## Why
 
