@@ -24,27 +24,28 @@ that rest on bare claims are rejected.
 
 ## Why
 
-LLMs assert; they do not prove. For tasks where a wrong number or an
-unverified claim is expensive — audits, invoices, inventory, multi-step
-analysis — the fix is not a smarter model but a surface the model must
-show its work on:
+LLMs assert; they do not prove. For work where an unverified step is expensive —
+audits, multi-step analysis, planning, anything that carries state — the fix is
+not a smarter model but a surface the model has to **show its work** on, symbolically:
 
-- **Exact-or-fail arithmetic** — integer math is exact within ±2^53;
-  overflow, NaN, and silent precision loss fail loudly instead of
-  rounding. The model never does arithmetic in its head.
-- **Derivation gate** — `finding(...)` facts must be derived by the rule
-  closure from primitive observations. Asserted findings block
-  `record_result`. There is no way to claim without showing.
-- **Actions with history** — consume/produce transformations archive what
-  they consume and record an event (binding, consumed, produced). The
-  board keeps the process, not just the end state.
-- **Truth maintenance** — retract an input and everything resting on it
-  falls; contradictions taint downstream conclusions as disputed.
-- **Teaching errors** — every rejection explains how to fix the call.
-  Validated to keep 27B-class local models productive.
-- **No model, no GPU, no network** — rulith never calls an LLM. It is a
-  pure local kernel (Node ≥ 20, two pure-JS dependencies) that the agent
-  drives over MCP stdio.
+- **Deductive closure** — the agent proposes facts and rules; the board derives
+  every consequence to fixpoint and tags it `[derived]` with an evidence chain. A
+  `finding(...)` must be derived from primitive observations, not asserted — bare
+  findings block `record_result`. No way to claim a result without showing it.
+- **Exact-or-fail arithmetic** — integer math is exact within ±2^53; overflow,
+  NaN, and silent precision loss fail loudly instead of rounding. The sharpest
+  case of "show your work" — the model never does arithmetic in its head.
+- **Actions with history** — consume/produce transformations archive what they
+  consume and record an event (binding, consumed, produced). The board keeps the
+  process, not just the end state.
+- **Truth maintenance** — retract an input and everything resting on it falls;
+  declare a key functional and contradictions taint downstream conclusions as
+  disputed.
+- **Teaching errors** — every rejection explains how to fix the call. Validated
+  to keep 27B-class local models productive.
+- **No model, no GPU, no network** — rulith never calls an LLM. It is a pure
+  local kernel (Node ≥ 20, two pure-JS dependencies) that the agent drives over
+  MCP stdio.
 
 ## Install
 
@@ -87,8 +88,8 @@ costs the model can't fudge:
 ```json
 {
   "operations": [
-    { "op": "assert_fact", "predicate": "line", "args": { "item": "widget", "unit": 1299, "qty": 7 } },
-    { "op": "assert_fact", "predicate": "line", "args": { "item": "gasket", "unit": 4500, "qty": 12 } },
+    { "op": "assert_fact", "id": "line_widget", "predicate": "line", "args": { "item": "widget", "unit": 1299, "qty": 7 } },
+    { "op": "assert_fact", "id": "line_gasket", "predicate": "line", "args": { "item": "gasket", "unit": 4500, "qty": 12 } },
     { "op": "add_axiom", "id": "ax_cost", "label": "cost = unit * qty",
       "when": [
         { "predicate": "line", "args": { "item": "?i", "unit": "?u", "qty": "?q" } },
@@ -112,6 +113,72 @@ budget with the `gt` built-in, or consume/produce inventory with `define_action`
 Open goals come back with teaching hints (`needs via <rule>: ...`) naming the
 missing fact. And `record_result` on a bare assertion — rather than a derived
 fact — is rejected: show your work, or get nothing.
+
+## Beyond arithmetic — what else the board enforces
+
+The same board does three more things an LLM can't be trusted to do by feel:
+
+**Actions leave a trail.** `define_action` describes a consume/produce
+transformation — negated effects are consumed, positive ones produced — and
+`apply_action` runs it, recording an event:
+
+```json
+{ "op": "define_action", "id": "craft", "action": "craft_sword", "label": "spend 2 gold, get 1 sword",
+  "preconditions": [
+    { "predicate": "have", "args": { "item": "gold", "qty": "?q" } },
+    { "predicate": "gte", "args": { "left": "?q", "right": 2 } },
+    { "predicate": "sub", "args": { "left": "?q", "right": 2, "result": "?rest" } }
+  ],
+  "effects": [
+    { "predicate": "have", "args": { "item": "gold", "qty": "?q" }, "negated": true },
+    { "predicate": "have", "args": { "item": "gold", "qty": "?rest" } },
+    { "predicate": "have", "args": { "item": "sword", "qty": 1 } }
+  ] }
+```
+
+With `have(gold, 3)` on the board, `apply_action` leaves `have(gold, 1)` and
+`have(sword, 1)` plus a consumed/produced event — the board keeps the process,
+not just the end state. `simulate_action` previews the same delta without committing.
+
+**Contradictions taint, they don't merge.** Declare a key functional and a clash
+can't slip through:
+
+```json
+{ "op": "assert_fact", "predicate": "functional_dependency", "args": { "predicate": "cost", "key": "item" } }
+```
+
+Now if two sources ever assert a different `cost` for the same `item`, the board
+raises a `functional_conflict` and flags both facts `disputed` — conclusions
+resting on them inherit the taint, instead of one silently winning.
+
+**Retract an input and everything resting on it falls.** Truth maintenance is
+automatic — drop the widget line by its id:
+
+```json
+{ "op": "retract_node", "nodeId": "line_widget" }
+```
+
+and `cost(widget, 9093)`, plus any total derived from it, disappears with it.
+No conclusion outlives its premises.
+
+## Not just a calculator — a substrate for what to do next
+
+A board that only answered "what is true" would be a calculator. rulith also helps
+drive **what to do next**, in the same symbolic, auditable way:
+
+- **It names the next move.** An open goal comes back with `needs via <rule>: ...`
+  (which fact is missing) and `producible via action ...` (which defined action
+  would produce it) — not just "unproven".
+- **It previews before acting.** `simulate_action` and `validate_plan` return the
+  exact delta a step, or an ordered plan, would commit — so the agent checks
+  consequences before touching the world.
+- **It advances state, audited.** consume/produce actions carry the board forward
+  one verified transformation at a time, each leaving an event in the record.
+
+This is the **driving floor** the paper measures: how far a board carries an LLM
+from a single *claim*, through a multi-step *task*, toward an autonomous *lifetime*
+— the commitment ladder of the whitepaper. The kernel here is the public floor of
+that ladder; the higher rungs rest on the same *derived-or-it-didn't-happen* contract.
 
 ## Tools
 
