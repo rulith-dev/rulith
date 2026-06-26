@@ -40,6 +40,15 @@ export interface LlmConfig {
    * { usageProbe: false } turns it off for backends that reject the field.
    */
   usageProbe?: boolean
+  /**
+   * Reasoning controls for hybrid thinking models (DeepSeek v4-pro etc.). `thinking` toggles the
+   * reasoning pass — 'disabled' runs the stronger BASE without the slow thinking channel (faster,
+   * fewer tokens; the base may still beat an older chat model). `reasoningEffort` tunes its depth
+   * when enabled. Default RULITH_LLM_THINKING / RULITH_LLM_REASONING_EFFORT; BOTH omitted ⇒ the
+   * field is not sent at all (behaviour-preserving for chat models and local backends).
+   */
+  thinking?: 'enabled' | 'disabled'
+  reasoningEffort?: 'low' | 'medium' | 'high'
   fetchImpl?: typeof fetch
 }
 
@@ -76,6 +85,8 @@ export class LlmClient {
   private readonly maxStreamChars: number
   private readonly apiKey: string
   private readonly usageProbe: boolean
+  private readonly thinking?: 'enabled' | 'disabled'
+  private readonly reasoningEffort?: 'low' | 'medium' | 'high'
   private readonly fetchImpl: typeof fetch
   private usageAcc: LlmUsage = { ...EMPTY_USAGE }
 
@@ -90,6 +101,9 @@ export class LlmClient {
       config.maxStreamChars ?? Number(process.env.RULITH_LLM_MAX_STREAM_CHARS ?? 8_000_000)
     this.apiKey = (config.apiKey ?? process.env.RULITH_LLM_API_KEY ?? '').trim()
     this.usageProbe = config.usageProbe ?? process.env.RULITH_LLM_USAGE !== '0'
+    this.thinking = config.thinking ?? (process.env.RULITH_LLM_THINKING as 'enabled' | 'disabled' | undefined)
+    this.reasoningEffort =
+      config.reasoningEffort ?? (process.env.RULITH_LLM_REASONING_EFFORT as 'low' | 'medium' | 'high' | undefined)
     this.fetchImpl = config.fetchImpl ?? globalThis.fetch
   }
 
@@ -176,6 +190,11 @@ export class LlmClient {
         messages,
         temperature: this.temperature,
         max_tokens: this.maxTokens,
+        // Hybrid thinking models (DeepSeek v4-pro): thinking:{type} toggles the reasoning pass,
+        // reasoning_effort tunes its depth. Both env-gated + omitted by default ⇒ chat models /
+        // local backends get the exact same body as before (no behaviour change).
+        ...(this.thinking ? { thinking: { type: this.thinking } } : {}),
+        ...(this.reasoningEffort ? { reasoning_effort: this.reasoningEffort } : {}),
         ...(this.stream
           ? { stream: true, ...(this.usageProbe ? { stream_options: { include_usage: true } } : {}) }
           : {}),

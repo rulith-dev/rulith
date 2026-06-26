@@ -51,6 +51,11 @@ export const PROTECTED_GOALPOSTS: ProtectedGoalpost[] = [
   // gate (coverage_gap_in → blocks task_done). Pinned by committed_coverage(root, item); one-shot
   // amendment_result(kind='coverage'). Opt-in (inert without the marker).
   { marker: 'committed_coverage', target: 'required_coverage', key: ['root', 'item'], amendmentKind: 'coverage' },
+  // ② reactive convergence (theory §4 / reactive-policy-spec.md): the livelock drive budget drive_budget(root, n)
+  // is a committed baseline — a model may not retract it or revise N larger to outrun the starvation escalation.
+  // Pinned by committed_drive_budget(root); one-shot amendment_result(kind='budget'). Faithful twin of
+  // committed_phase: gives the batch gate AND the #109 action-laundering path for free. Opt-in (inert without the marker).
+  { marker: 'committed_drive_budget', target: 'drive_budget', key: ['root'], amendmentKind: 'budget' },
 ]
 
 export function goalpostKey(args: SemanticArgs | undefined, fields: string[]): string | null {

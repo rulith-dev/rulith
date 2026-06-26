@@ -136,7 +136,7 @@ const AUDIT: ToolProfile[] = ['audit', 'expert']
  * Keep in sync with the union in engine/working-memory.ts. None of these names
  * collide with a dispatched tool or a registry (file/web/write) tool.
  */
-const BOARD_OP_TOOLS = new Set<string>([
+export const BOARD_OP_TOOLS = new Set<string>([
   'declare_goal',
   'assert_fact',
   'declare_hypothesis',

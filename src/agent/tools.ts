@@ -106,7 +106,10 @@ export function insideRoot(path: string, ctx: ToolContext): string | undefined {
   return undefined
 }
 
-const SKIP_DIRS = new Set(['node_modules', 'target', 'dist', 'build', '.git', '.svn'])
+// Dirs a code grep should never descend into: deps, build output (incl. this repo's build-test/), VCS
+// metadata, and .agent-sync/ (agent-to-agent messages). The last two surfaced as noise in a real deepseek
+// run on a kernel source — search_files hit .agent-sync docs + build-test/*.js before the real .ts (#135).
+const SKIP_DIRS = new Set(['node_modules', 'target', 'dist', 'build', 'build-test', '.git', '.svn', '.agent-sync'])
 
 function collectFiles(
   root: string,

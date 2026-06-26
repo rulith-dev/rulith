@@ -74,6 +74,45 @@ Or in any MCP host, project-scoped `.mcp.json`:
 Optional persistence across sessions: set env `RULITH_DB` to a `.jsonl`
 file path. Without it, the board lives and dies with the session.
 
+## Quickstart
+
+rulith is driven by an agent over MCP: the agent proposes facts and rules,
+the board derives the rest — and shows its work. A minimal session — line-item
+costs the model can't fudge:
+
+**1. Open a board.** `create_space` `{ "title": "invoice" }` returns a space id.
+
+**2. Assert the line items + a costing rule** in one `update_working_memory` call:
+
+```json
+{
+  "operations": [
+    { "op": "assert_fact", "predicate": "line", "args": { "item": "widget", "unit": 1299, "qty": 7 } },
+    { "op": "assert_fact", "predicate": "line", "args": { "item": "gasket", "unit": 4500, "qty": 12 } },
+    { "op": "add_axiom", "id": "ax_cost", "label": "cost = unit * qty",
+      "when": [
+        { "predicate": "line", "args": { "item": "?i", "unit": "?u", "qty": "?q" } },
+        { "predicate": "mul",  "args": { "left": "?u", "right": "?q", "result": "?t" } }
+      ],
+      "then": [{ "predicate": "cost", "args": { "item": "?i", "total": "?t" } }] }
+  ]
+}
+```
+
+`mul` is a built-in arithmetic predicate: the board computes `1299 × 7` and
+`4500 × 12` exactly (BigInt-checked) and binds `?t`.
+
+**3. Read the board.** `get_logic_context` returns `cost(widget, 9093)` and
+`cost(gasket, 54000)`, each tagged `[derived]` with an evidence chain back to its
+`line` fact. The model never did the arithmetic — the board did, and it cannot be
+off by a digit.
+
+From here: roll the costs into a total with `derive_aggregate` (sum), guard a
+budget with the `gt` built-in, or consume/produce inventory with `define_action`.
+Open goals come back with teaching hints (`needs via <rule>: ...`) naming the
+missing fact. And `record_result` on a bare assertion — rather than a derived
+fact — is rejected: show your work, or get nothing.
+
 ## Tools
 
 `create_space`, `update_working_memory` (declare_goal / assert_fact /
@@ -104,9 +143,16 @@ scored **8/10**, every solved value closure-derived, median 3 turns.
 Across all ten problems the board never displayed a single wrong number
 — it either derived the exact value or claimed nothing. The two board
 losses were generation-level runaways, replayed clean and re-verified
-with BigInt. Fixtures: `src/examples/bench-arith.ts` (and `bench-audit.ts`). 1,100+ unit
-tests; CI on Linux and Windows. A/B benchmark fixtures (exact
-arithmetic, error-finding audits) ship in `src/examples/`.
+with BigInt. 1,200+ unit tests; CI on Linux and Windows.
+
+Eight A/B benchmark fixtures ship in `src/examples/`, each pitting board against
+baseline on a dimension a strong model still gets wrong:
+`bench-arith` (exact arithmetic), `bench-audit` (error-finding audits),
+`bench-coding-trust` (a fabricated "fix" is blocked — the board certifies a repair
+only from a real edit plus a passing test), `bench-repair` (diagnosis-first bug
+repair), `bench-revision` (content-addressed consistency under concurrent edits),
+and `bench-aggregate` (exact summation) — plus the `bench-arms` / `bench-pool`
+cross-model harness (run any fixture board-vs-baseline, two models, token-metered).
 
 ## License
 
